@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: secop-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333" # REST API
+      - "6334:6334" # gRPC
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:-}
+
+  scraper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: secop-scraper
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    environment:
+      CAPSOLVER_API_KEY: ${CAPSOLVER_API_KEY}
+      SCRAPER_BASE_URL: ${SCRAPER_BASE_URL:-https://community.secop.gov.co}
+      SECOP_RECAPTCHA_SITEKEY: ${SECOP_RECAPTCHA_SITEKEY}
+
+volumes:
+  qdrant_storage:
