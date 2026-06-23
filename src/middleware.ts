@@ -10,5 +10,8 @@ export const config = {
     "/api/profile/:path*",
     "/dashboard/:path*",
     "/api/dashboard/:path*",
+    "/historial/:path*",
+    "/api/analyze/history/:path*",
+    "/api/analyze/calibracion/:path*",
   ],
 };

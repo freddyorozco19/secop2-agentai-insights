@@ -109,9 +109,14 @@ export default function DashboardPage() {
               Histórico de análisis de viabilidad de tu empresa
             </p>
           </div>
-          <Link href="/" className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
-            ← Volver al inicio
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/historial" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+              Ver historial completo →
+            </Link>
+            <Link href="/" className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
+              ← Volver al inicio
+            </Link>
+          </div>
         </div>
       </div>
 

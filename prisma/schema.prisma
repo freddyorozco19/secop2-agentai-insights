@@ -82,18 +82,30 @@ enum ModoAnalisis {
   DUMMY
 }
 
+enum ResultadoAplicacion {
+  PENDIENTE
+  GANADO
+  PERDIDO
+  NO_APLICO
+}
+
 model AnalisisHistorico {
-  id            String       @id @default(cuid())
+  id            String              @id @default(cuid())
   tenantId      String
-  company       Company      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  company       Company             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   procesoObjeto String
   valorEstimado Float
   puntaje       Int
   nivel         String
   modoAnalisis  ModoAnalisis
   brechasJson   String
-  createdAt     DateTime     @default(now())
+  seAplico      Boolean             @default(false)
+  resultado     ResultadoAplicacion @default(PENDIENTE)
+  notas         String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 
   @@index([tenantId])
   @@index([tenantId, createdAt])
+  @@index([tenantId, resultado])
 }
