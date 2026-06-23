@@ -59,6 +59,8 @@ export interface BrechaRequisito {
   detalle: string;
   recomendacion: string;
   peso: number;
+  /** Nombres de los documentos del cliente usados como evidencia (solo en análisis RAG). */
+  citas?: string[];
 }
 
 export interface AnalisisViabilidad {

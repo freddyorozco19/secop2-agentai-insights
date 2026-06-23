@@ -6,12 +6,16 @@ import { extractFromPDF, ExtractionError } from "@/lib/ai/extractor";
 import { getProcessDocuments, downloadDocument, ScraperError } from "@/lib/secop/scraper";
 import { CaptchaError } from "@/lib/secop/captcha";
 import { SessionError } from "@/lib/secop/session";
+import { analizarConRAG, RAGAgentError } from "@/lib/rag/agent";
 
 interface CompareRequestBody {
   proceso?: ProcesoEstructurado;
   noticeUID?: string;
   documentType?: "pliego" | "estudios";
   empresaId?: string;
+  /** Si es true, compara contra los documentos reales del cliente (S8/S9) en vez del perfil dummy. */
+  useRAG?: boolean;
+  tenantId?: string;
 }
 
 export async function POST(request: Request) {
@@ -25,7 +29,13 @@ export async function POST(request: Request) {
     );
   }
 
-  const { proceso, noticeUID, documentType = "pliego" } = body;
+  const {
+    proceso,
+    noticeUID,
+    documentType = "pliego",
+    useRAG = false,
+    tenantId = "techcorp-demo",
+  } = body;
 
   if (!proceso && !noticeUID) {
     return NextResponse.json(
@@ -66,6 +76,20 @@ export async function POST(request: Request) {
       }
       const message =
         error instanceof Error ? error.message : "Error al obtener proceso.";
+      return NextResponse.json({ error: message }, { status: 500 });
+    }
+  }
+
+  if (useRAG) {
+    try {
+      const analisis = await analizarConRAG(procesoEstructurado, tenantId);
+      return NextResponse.json(analisis);
+    } catch (error) {
+      if (error instanceof RAGAgentError) {
+        return NextResponse.json({ error: error.message }, { status: 503 });
+      }
+      const message =
+        error instanceof Error ? error.message : "Error en el análisis RAG.";
       return NextResponse.json({ error: message }, { status: 500 });
     }
   }

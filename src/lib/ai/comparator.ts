@@ -3,20 +3,13 @@ import type { EmpresaProfile } from "@/types/company";
 import {
   BrechaRequisito,
   AnalisisViabilidad,
-  CategoriaRequisito,
   EstadoRequisito,
   NivelViabilidad,
   PESOS_POR_CATEGORIA,
   nivelViabilidad,
   descripcionNivel,
 } from "@/types/ai";
-
-interface ScoreCategory {
-  categoria: CategoriaRequisito;
-  pesoTotal: number;
-  pesoObtenido: number;
-  brechas: BrechaRequisito[];
-}
+import { calcularScore, generarRecomendaciones } from "@/lib/ai/scoring";
 
 function evaluarJuridicos(
   proceso: ProcesoEstructurado,
@@ -309,46 +302,6 @@ function evaluarCertificaciones(
   return brechas;
 }
 
-function calcularScore(brechas: BrechaRequisito[]): {
-  puntaje: number;
-  porCategoria: ScoreCategory[];
-} {
-  const categorias: CategoriaRequisito[] = [
-    "JURIDICO",
-    "FINANCIERO",
-    "EXPERIENCIA",
-    "EQUIPO",
-    "CERTIFICACION",
-  ];
-
-  const porCategoria: ScoreCategory[] = categorias.map((categoria) => {
-    const brechasCat = brechas.filter((b) => b.categoria === categoria);
-    const pesoTotal = brechasCat.reduce((sum, b) => sum + b.peso, 0);
-
-    const pesoObtenido = brechasCat.reduce((sum, b) => {
-      if (b.estado === "CUMPLE") return sum + b.peso;
-      if (b.estado === "PARCIAL") return sum + b.peso * 0.5;
-      if (b.estado === "NO_APLICA") return sum + b.peso * 0.5;
-      return sum;
-    }, 0);
-
-    return { categoria, pesoTotal, pesoObtenido, brechas: brechasCat };
-  });
-
-  const pesoTotalGlobal = porCategoria.reduce((s, c) => s + c.pesoTotal, 0);
-  const pesoObtenidoGlobal = porCategoria.reduce(
-    (s, c) => s + c.pesoObtenido,
-    0,
-  );
-
-  const puntaje =
-    pesoTotalGlobal > 0
-      ? Math.round((pesoObtenidoGlobal / pesoTotalGlobal) * 100)
-      : 0;
-
-  return { puntaje, porCategoria };
-}
-
 function generarResumen(
   proceso: ProcesoEstructurado,
   empresa: EmpresaProfile,
@@ -366,15 +319,6 @@ function generarResumen(
     `De ${brechas.length} requisito(s) evaluado(s): ${cumplen} cumplen, ${parciales} parciales, ${noCumplen} no cumplen. ` +
     `Nivel de viabilidad: ${nivel} — ${descripcionNivel(nivel)}.`
   );
-}
-
-function generarRecomendaciones(brechas: BrechaRequisito[]): string[] {
-  const recomendaciones = brechas
-    .filter((b) => b.estado === "NO_CUMPLE" || b.estado === "PARCIAL")
-    .map((b) => b.recomendacion);
-
-  const unicas = [...new Set(recomendaciones)];
-  return unicas.slice(0, 10);
 }
 
 export function compararProceso(
