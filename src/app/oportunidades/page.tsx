@@ -14,9 +14,12 @@ interface FeedResponse {
   fecha: string;
 }
 
-function todayCol(): string {
-  // Colombia UTC-5
-  const d = new Date(Date.now() - 5 * 60 * 60 * 1000);
+function lastWorkingDay(): string {
+  // Colombia UTC-5, retrocede al último día hábil (el API tiene ~1 día de delay)
+  const d = new Date(Date.now() - 5 * 60 * 60 * 1000 - 24 * 60 * 60 * 1000);
+  const dow = d.getUTCDay(); // 0=Dom, 6=Sab
+  if (dow === 0) d.setUTCDate(d.getUTCDate() - 2); // domingo → viernes
+  if (dow === 6) d.setUTCDate(d.getUTCDate() - 1); // sábado → viernes
   return d.toISOString().split("T")[0];
 }
 
@@ -63,7 +66,7 @@ function NivelBar({ score }: { score: number }) {
 }
 
 export default function OportunidadesPage() {
-  const [fecha, setFecha] = useState(todayCol());
+  const [fecha, setFecha] = useState(lastWorkingDay());
   const [modalidad, setModalidad] = useState("");
   const [minScore, setMinScore] = useState(0);
   const [page, setPage] = useState(1);
@@ -134,7 +137,7 @@ export default function OportunidadesPage() {
             <input
               type="date"
               value={fecha}
-              max={todayCol()}
+              max={new Date().toISOString().split("T")[0]}
               onChange={(e) => applyFilter(() => setFecha(e.target.value))}
               className="bg-[#0f1117] border border-[#2e3350] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
             />
@@ -353,7 +356,10 @@ export default function OportunidadesPage() {
           <div className="text-center py-20">
             <p className="text-gray-500 text-lg">Sin resultados para {data.fecha}</p>
             <p className="text-gray-600 text-sm mt-2">
-              Prueba con otra fecha o reduciendo el score mínimo.
+              El API de SECOP tiene ~1 día de delay. Prueba con el viernes o jueves anterior.
+            </p>
+            <p className="text-gray-700 text-xs mt-1">
+              Los fines de semana no se publican procesos.
             </p>
           </div>
         )}
