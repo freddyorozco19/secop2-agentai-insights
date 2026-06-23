@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { parsePdf } from "@/lib/ai/extractor";
 import { indexCompanyDocument } from "@/lib/rag/indexer";
 import type { DocumentType } from "@/generated/prisma/client";
 
 export const dynamic = "force-dynamic";
-
-// Auth/onboarding llega en S11 — por ahora un tenant fijo para el piloto.
-const DEFAULT_TENANT_ID = "techcorp-demo";
 
 const VALID_TYPES = [
   "PERFIL_FINANCIERO",
@@ -30,11 +29,14 @@ async function extractText(file: File): Promise<string> {
   return buffer.toString("utf-8");
 }
 
-export async function GET(req: NextRequest) {
-  const tenantId = req.nextUrl.searchParams.get("tenantId") ?? DEFAULT_TENANT_ID;
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ error: "No autenticado." }, { status: 401 });
+  }
 
   const documentos = await prisma.companyDocument.findMany({
-    where: { tenantId },
+    where: { tenantId: session.user.companyId },
     orderBy: { createdAt: "desc" },
   });
 
@@ -42,12 +44,17 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ error: "No autenticado." }, { status: 401 });
+  }
+  const tenantId = session.user.companyId;
+
   try {
     const formData = await req.formData();
     const file = formData.get("file");
     const tipo = formData.get("tipo")?.toString() ?? "OTRO";
     const nombre = formData.get("nombre")?.toString();
-    const tenantId = formData.get("tenantId")?.toString() ?? DEFAULT_TENANT_ID;
 
     if (!(file instanceof File)) {
       return NextResponse.json(
@@ -93,7 +100,7 @@ export async function POST(req: NextRequest) {
     try {
       const { chunksIndexed } = await indexCompanyDocument(
         tenantId,
-        DEFAULT_TENANT_ID, // clientId — un solo perfil de empresa por tenant en el piloto
+        tenantId, // clientId — un solo perfil de empresa por tenant en el piloto
         doc.id,
         textoExtraido,
       );

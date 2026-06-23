@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { parseProcessInput } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ export default function ProcessAnalyzer() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -64,9 +66,26 @@ export default function ProcessAnalyzer() {
             </h1>
             <p className="text-xs text-muted">Piloto · Contratación pública Colombia</p>
           </div>
-          <span className="ml-auto rounded-full border border-border bg-surface2 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted">
-            Pilot
-          </span>
+          <div className="ml-auto flex items-center gap-2">
+            {status === "authenticated" && session ? (
+              <>
+                <span className="text-[11px] text-muted">{session.user.name}</span>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="rounded-full border border-border bg-surface2 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted hover:text-foreground transition"
+                >
+                  Salir
+                </button>
+              </>
+            ) : status === "unauthenticated" ? (
+              <Link
+                href="/login"
+                className="rounded-full border border-border bg-surface2 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted hover:text-foreground transition"
+              >
+                Iniciar sesión
+              </Link>
+            ) : null}
+          </div>
         </header>
 
         <section className="mb-8">

@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import type { ProcesoEstructurado } from "@/types/ai";
 import { compararProceso } from "@/lib/ai/comparator";
 import { DUMMY_PROFILE } from "@/lib/company/dummyProfile";
@@ -13,9 +16,8 @@ interface CompareRequestBody {
   noticeUID?: string;
   documentType?: "pliego" | "estudios";
   empresaId?: string;
-  /** Si es true, compara contra los documentos reales del cliente (S8/S9) en vez del perfil dummy. */
+  /** Si es true, compara contra los documentos reales del cliente (S8/S9) en vez del perfil dummy. Requiere sesión. */
   useRAG?: boolean;
-  tenantId?: string;
 }
 
 export async function POST(request: Request) {
@@ -29,13 +31,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const {
-    proceso,
-    noticeUID,
-    documentType = "pliego",
-    useRAG = false,
-    tenantId = "techcorp-demo",
-  } = body;
+  const { proceso, noticeUID, documentType = "pliego", useRAG = false } = body;
+
+  if (useRAG) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "El análisis con RAG requiere iniciar sesión." },
+        { status: 401 },
+      );
+    }
+  }
 
   if (!proceso && !noticeUID) {
     return NextResponse.json(
@@ -82,7 +88,16 @@ export async function POST(request: Request) {
 
   if (useRAG) {
     try {
-      const analisis = await analizarConRAG(procesoEstructurado, tenantId);
+      const session = await getServerSession(authOptions);
+      const company = await prisma.company.findUnique({
+        where: { id: session!.user.companyId },
+      });
+      const analisis = await analizarConRAG(
+        procesoEstructurado,
+        session!.user.companyId,
+        company?.nombre,
+        company?.nit ?? undefined,
+      );
       return NextResponse.json(analisis);
     } catch (error) {
       if (error instanceof RAGAgentError) {

@@ -12,6 +12,36 @@ datasource db {
   provider = "sqlite"
 }
 
+enum UserRole {
+  ADMIN
+  ANALISTA
+  CONSULTOR
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  nombre    String
+  nit       String?
+  sector    String?
+  createdAt DateTime @default(now())
+
+  users     User[]
+  documents CompanyDocument[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         UserRole @default(ANALISTA)
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+
+  @@index([companyId])
+}
+
 enum DocumentType {
   PERFIL_FINANCIERO
   CERTIFICACION
@@ -31,6 +61,7 @@ enum IndexStatus {
 model CompanyDocument {
   id            String       @id @default(cuid())
   tenantId      String
+  company       Company      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   nombre        String
   tipo          DocumentType
   archivoUrl    String
