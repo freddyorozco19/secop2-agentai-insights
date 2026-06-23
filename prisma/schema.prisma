@@ -27,6 +27,7 @@ model Company {
 
   users     User[]
   documents CompanyDocument[]
+  analisis  AnalisisHistorico[]
 }
 
 model User {
@@ -74,4 +75,25 @@ model CompanyDocument {
 
   @@index([tenantId])
   @@index([tenantId, tipo])
+}
+
+enum ModoAnalisis {
+  RAG
+  DUMMY
+}
+
+model AnalisisHistorico {
+  id            String       @id @default(cuid())
+  tenantId      String
+  company       Company      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  procesoObjeto String
+  valorEstimado Float
+  puntaje       Int
+  nivel         String
+  modoAnalisis  ModoAnalisis
+  brechasJson   String
+  createdAt     DateTime     @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
 }

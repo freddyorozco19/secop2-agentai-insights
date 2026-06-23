@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import type { PreScreenResult } from "@/lib/ai/prescreener";
-import { MODALIDADES } from "@/lib/secop/discovery";
+import { MODALIDADES, lastWorkingDayISO } from "@/lib/secop/discovery";
 
 interface FeedResponse {
   items: PreScreenResult[];
@@ -12,15 +12,6 @@ interface FeedResponse {
   pageSize: number;
   totalPages: number;
   fecha: string;
-}
-
-function lastWorkingDay(): string {
-  // Colombia UTC-5, retrocede al último día hábil (el API tiene ~1 día de delay)
-  const d = new Date(Date.now() - 5 * 60 * 60 * 1000 - 24 * 60 * 60 * 1000);
-  const dow = d.getUTCDay(); // 0=Dom, 6=Sab
-  if (dow === 0) d.setUTCDate(d.getUTCDate() - 2); // domingo → viernes
-  if (dow === 6) d.setUTCDate(d.getUTCDate() - 1); // sábado → viernes
-  return d.toISOString().split("T")[0];
 }
 
 function fmt(n: number | null): string {
@@ -66,7 +57,7 @@ function NivelBar({ score }: { score: number }) {
 }
 
 export default function OportunidadesPage() {
-  const [fecha, setFecha] = useState(lastWorkingDay());
+  const [fecha, setFecha] = useState(lastWorkingDayISO());
   const [modalidad, setModalidad] = useState("");
   const [minScore, setMinScore] = useState(0);
   const [page, setPage] = useState(1);

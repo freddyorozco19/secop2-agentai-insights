@@ -21,6 +21,15 @@ function normalizeProcess(raw: Record<string, unknown>): SecopProcess {
   };
 }
 
+/** Último día hábil con datos disponibles — el API de Socrata tiene ~1 día de delay y no publica fines de semana. */
+export function lastWorkingDayISO(): string {
+  const d = new Date(Date.now() - 5 * 60 * 60 * 1000 - 24 * 60 * 60 * 1000);
+  const dow = d.getUTCDay();
+  if (dow === 0) d.setUTCDate(d.getUTCDate() - 2);
+  if (dow === 6) d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().split("T")[0];
+}
+
 export interface DiscoveryFilters {
   fecha: string; // YYYY-MM-DD
   modalidad?: string;

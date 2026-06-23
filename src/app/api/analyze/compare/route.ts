@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { getServerSession, type Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import type { ProcesoEstructurado } from "@/types/ai";
+import type { AnalisisViabilidad, ProcesoEstructurado } from "@/types/ai";
 import { compararProceso } from "@/lib/ai/comparator";
 import { DUMMY_PROFILE } from "@/lib/company/dummyProfile";
 import { extractFromPDF, ExtractionError } from "@/lib/ai/extractor";
@@ -20,6 +20,30 @@ interface CompareRequestBody {
   useRAG?: boolean;
 }
 
+async function persistirHistorico(
+  session: Session | null,
+  analisis: AnalisisViabilidad,
+  modo: "RAG" | "DUMMY",
+) {
+  if (!session?.user) return;
+  try {
+    await prisma.analisisHistorico.create({
+      data: {
+        tenantId: session.user.companyId,
+        procesoObjeto: analisis.proceso.objeto || "Sin título",
+        valorEstimado: analisis.proceso.valorEstimado,
+        puntaje: analisis.puntaje,
+        nivel: analisis.nivel,
+        modoAnalisis: modo,
+        brechasJson: JSON.stringify(analisis.brechas),
+      },
+    });
+  } catch (err) {
+    console.error("[compare] no se pudo guardar historial:", err);
+    // No bloquea la respuesta al usuario si falla el guardado del historial.
+  }
+}
+
 export async function POST(request: Request) {
   let body: CompareRequestBody;
   try {
@@ -32,15 +56,13 @@ export async function POST(request: Request) {
   }
 
   const { proceso, noticeUID, documentType = "pliego", useRAG = false } = body;
+  const session = await getServerSession(authOptions);
 
-  if (useRAG) {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: "El análisis con RAG requiere iniciar sesión." },
-        { status: 401 },
-      );
-    }
+  if (useRAG && !session?.user) {
+    return NextResponse.json(
+      { error: "El análisis con RAG requiere iniciar sesión." },
+      { status: 401 },
+    );
   }
 
   if (!proceso && !noticeUID) {
@@ -88,7 +110,6 @@ export async function POST(request: Request) {
 
   if (useRAG) {
     try {
-      const session = await getServerSession(authOptions);
       const company = await prisma.company.findUnique({
         where: { id: session!.user.companyId },
       });
@@ -98,6 +119,7 @@ export async function POST(request: Request) {
         company?.nombre,
         company?.nit ?? undefined,
       );
+      await persistirHistorico(session, analisis, "RAG");
       return NextResponse.json(analisis);
     } catch (error) {
       if (error instanceof RAGAgentError) {
@@ -110,6 +132,7 @@ export async function POST(request: Request) {
   }
 
   const analisis = compararProceso(procesoEstructurado, DUMMY_PROFILE);
+  await persistirHistorico(session, analisis, "DUMMY");
 
   return NextResponse.json(analisis);
 }
