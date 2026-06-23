@@ -137,6 +137,16 @@ export default function ProcessAnalyzer() {
             {error ? (
               <p className="mt-3 text-xs font-medium text-danger">{error}</p>
             ) : null}
+            <div className="mt-3 flex items-center gap-2 text-[11px] text-muted">
+              <span>Ejemplo:</span>
+              <code className="rounded-md border border-border bg-surface2 px-2 py-0.5 font-mono text-[11px] text-brand">
+                CO1.REQ.5912737
+              </code>
+              <span>o</span>
+              <code className="rounded-md border border-border bg-surface2 px-2 py-0.5 font-mono text-[11px] text-brand">
+                https://community.secop.gov.co/...
+              </code>
+            </div>
           </form>
         </section>
 
