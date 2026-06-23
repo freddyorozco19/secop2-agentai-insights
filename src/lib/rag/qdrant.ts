@@ -122,24 +122,32 @@ export async function similaritySearch(
   }));
 }
 
-/** Borra todos los puntos de un refId específico (ej. al re-indexar un documento). */
+/**
+ * Borra puntos por refId (ej. todos los docs de un proceso SECOP) o, si se
+ * pasa sourceFile, solo los chunks de ese documento específico — necesario
+ * porque varios documentos de un mismo cliente comparten refId (clientId).
+ */
 export async function deleteByRef(
   tenantId: string,
   refType: RefType,
   refId: string,
+  sourceFile?: string,
 ): Promise<void> {
   const c = getClient();
   await ensureCollection();
 
+  const must: Record<string, unknown>[] = [
+    { key: "tenantId", match: { value: tenantId } },
+    { key: "refType", match: { value: refType } },
+    { key: "refId", match: { value: refId } },
+  ];
+  if (sourceFile) {
+    must.push({ key: "sourceFile", match: { value: sourceFile } });
+  }
+
   await c.delete(COLLECTION_NAME, {
     wait: true,
-    filter: {
-      must: [
-        { key: "tenantId", match: { value: tenantId } },
-        { key: "refType", match: { value: refType } },
-        { key: "refId", match: { value: refId } },
-      ],
-    },
+    filter: { must },
   });
 }
 

@@ -164,6 +164,12 @@ export default function ProcessAnalyzer() {
           >
             <span aria-hidden>📋</span> Ver oportunidades del día
           </Link>
+          <Link
+            href="/perfil/documentos"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface2 px-4 py-2.5 text-xs font-semibold text-muted transition hover:text-foreground"
+          >
+            <span aria-hidden>📁</span> Documentos de la empresa
+          </Link>
         </section>
 
         <section className="mt-8 rounded-2xl border border-border bg-surface p-5 sm:p-6">

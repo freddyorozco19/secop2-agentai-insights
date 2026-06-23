@@ -30,7 +30,7 @@ function getModel(): string {
 
 type PdfParseModule = { default: (data: Buffer) => Promise<{ text: string; numpages: number }> };
 
-async function parsePdf(pdfBuffer: Buffer): Promise<{ text: string; numpages: number }> {
+export async function parsePdf(pdfBuffer: Buffer): Promise<{ text: string; numpages: number }> {
   try {
     const mod = (await import("pdf-parse")) as unknown as PdfParseModule;
     const result = await mod.default(pdfBuffer);
@@ -228,4 +228,4 @@ function mergeResults(
   return merged;
 }
 
-export { parsePdf, chunkText };
+export { chunkText };
