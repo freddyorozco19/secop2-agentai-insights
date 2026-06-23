@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { parseProcessInput } from "@/lib/utils";
 
 const STEPS = [
@@ -148,6 +149,15 @@ export default function ProcessAnalyzer() {
               </code>
             </div>
           </form>
+        </section>
+
+        <section className="mt-4 flex items-center justify-center">
+          <Link
+            href="/demo"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface2 px-4 py-2.5 text-xs font-semibold text-muted transition hover:text-foreground"
+          >
+            <span aria-hidden>▶</span> Ver demo con datos simulados
+          </Link>
         </section>
 
         <section className="mt-8 rounded-2xl border border-border bg-surface p-5 sm:p-6">
