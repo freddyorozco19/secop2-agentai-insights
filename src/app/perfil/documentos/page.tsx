@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import Link from "next/link";
 
 interface CompanyDocument {
   id: string;
@@ -121,9 +120,6 @@ export default function DocumentosPage() {
               Sube perfiles financieros, certificaciones y HVs — se indexan automáticamente para el análisis con IA
             </p>
           </div>
-          <Link href="/" className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
-            ← Volver al inicio
-          </Link>
         </div>
       </div>
 

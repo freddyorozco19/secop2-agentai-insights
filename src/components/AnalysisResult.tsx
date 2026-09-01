@@ -67,13 +67,6 @@ export default function AnalysisResult({ processId }: AnalysisResultProps) {
   if (loading) {
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-6 py-16 sm:py-24">
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 text-xs font-medium text-muted transition hover:text-foreground"
-        >
-          <span aria-hidden>←</span> Volver al inicio
-        </Link>
-
         <div className="flex flex-1 flex-col items-center justify-center gap-8">
           <div
             className="h-12 w-12 animate-spin rounded-full border-4 border-border border-t-brand"
@@ -124,12 +117,6 @@ export default function AnalysisResult({ processId }: AnalysisResultProps) {
   if (error) {
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-6 py-16 sm:py-24">
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 text-xs font-medium text-muted transition hover:text-foreground"
-        >
-          <span aria-hidden>←</span> Volver al inicio
-        </Link>
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
           <div
             className="flex h-16 w-16 items-center justify-center rounded-full text-2xl"
@@ -154,13 +141,6 @@ export default function AnalysisResult({ processId }: AnalysisResultProps) {
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col px-6 py-12 sm:py-16">
-      <Link
-        href="/"
-        className="mb-6 inline-flex items-center gap-2 text-xs font-medium text-muted transition hover:text-foreground"
-      >
-        <span aria-hidden>←</span> Volver al inicio
-      </Link>
-
       <header className="mb-8">
         <span className="inline-flex items-center rounded-full border border-border bg-surface2 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted">
           Resultado del análisis

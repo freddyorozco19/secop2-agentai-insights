@@ -110,12 +110,6 @@ export default function OportunidadesPage() {
               Procesos SECOP II rankeados por viabilidad para TechCorp Colombia
             </p>
           </div>
-          <Link
-            href="/"
-            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
-          >
-            ← Volver al inicio
-          </Link>
         </div>
       </div>
 

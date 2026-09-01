@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
-import Link from "next/link";
 import { parseProcessInput } from "@/lib/utils";
 
 const STEPS = [
@@ -26,7 +24,6 @@ export default function ProcessAnalyzer() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { data: session, status } = useSession();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -53,41 +50,6 @@ export default function ProcessAnalyzer() {
         }}
       />
       <div className="relative mx-auto flex min-h-screen w-full max-w-2xl flex-col px-6 py-16 sm:py-24">
-        <header className="mb-10 flex items-center gap-3">
-          <div
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-extrabold text-white shadow-lg"
-            style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}
-          >
-            SA
-          </div>
-          <div>
-            <h1 className="text-base font-bold leading-tight text-foreground">
-              SECOP AI <span className="text-brand">Analyzer</span>
-            </h1>
-            <p className="text-xs text-muted">Piloto · Contratación pública Colombia</p>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            {status === "authenticated" && session ? (
-              <>
-                <span className="text-[11px] text-muted">{session.user.name}</span>
-                <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="rounded-full border border-border bg-surface2 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted hover:text-foreground transition"
-                >
-                  Salir
-                </button>
-              </>
-            ) : status === "unauthenticated" ? (
-              <Link
-                href="/login"
-                className="rounded-full border border-border bg-surface2 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted hover:text-foreground transition"
-              >
-                Iniciar sesión
-              </Link>
-            ) : null}
-          </div>
-        </header>
-
         <section className="mb-8">
           <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl">
             Analiza procesos de SECOP II con IA
@@ -168,27 +130,6 @@ export default function ProcessAnalyzer() {
               </code>
             </div>
           </form>
-        </section>
-
-        <section className="mt-4 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/demo"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface2 px-4 py-2.5 text-xs font-semibold text-muted transition hover:text-foreground"
-          >
-            <span aria-hidden>▶</span> Ver demo con datos simulados
-          </Link>
-          <Link
-            href="/oportunidades"
-            className="inline-flex items-center gap-2 rounded-lg border border-indigo-500/40 bg-indigo-600/10 px-4 py-2.5 text-xs font-semibold text-indigo-400 transition hover:bg-indigo-600/20 hover:text-indigo-300"
-          >
-            <span aria-hidden>📋</span> Ver oportunidades del día
-          </Link>
-          <Link
-            href="/perfil/documentos"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface2 px-4 py-2.5 text-xs font-semibold text-muted transition hover:text-foreground"
-          >
-            <span aria-hidden>📁</span> Documentos de la empresa
-          </Link>
         </section>
 
         <section className="mt-8 rounded-2xl border border-border bg-surface p-5 sm:p-6">

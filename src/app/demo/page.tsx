@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { compararProceso } from "@/lib/ai/comparator";
 import { DUMMY_PROFILE } from "@/lib/company/dummyProfile";
 import { DEMO_PROCESS } from "@/lib/company/demoProcess";
@@ -10,13 +9,7 @@ export default function DemoPage() {
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col px-6 py-12 sm:py-16">
-      <div className="mb-6 flex items-center justify-between">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-xs font-medium text-muted transition hover:text-foreground"
-        >
-          <span aria-hidden>←</span> Volver al inicio
-        </Link>
+      <div className="mb-6 flex items-center justify-end">
         <span
           className="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
           style={{
