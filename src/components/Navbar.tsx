@@ -6,7 +6,7 @@ import { useSession, signOut } from "next-auth/react";
 
 const PUBLIC_LINKS = [
   { href: "/", label: "Analizar" },
-  { href: "/oportunidades", label: "Oportunidades" },
+  { href: "/oportunidades", label: "Ver oportunidades del día" },
   { href: "/demo", label: "Demo" },
 ];
 
